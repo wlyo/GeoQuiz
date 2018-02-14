@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -14,7 +15,8 @@ public class QuizActivity extends AppCompatActivity {
 
     private Button mTrueButton;
     private Button mFalseButton;
-    private Button mNextButton;
+    private ImageButton mNextButton;
+    private ImageButton mPreviousButton;
     private TextView mQuestionTextView;
 
     private Question[] mQuestionBank = new Question[] {
@@ -61,6 +63,14 @@ public class QuizActivity extends AppCompatActivity {
             }
         });
 
+        mPreviousButton = findViewById(R.id.previous_button);
+        mPreviousButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                previousQuestion();
+            }
+        });
+
         mNextButton = findViewById(R.id.next_button);
         mNextButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -93,6 +103,17 @@ public class QuizActivity extends AppCompatActivity {
 
     private void nextQuestion() {
         mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
+        updateQuestion();
+    }
+
+    private void previousQuestion() {
+        if (mCurrentIndex != 0) {
+            mCurrentIndex = (mCurrentIndex - 1) % mQuestionBank.length;
+        } else {
+            mCurrentIndex = 0;
+            Toast toast = Toast.makeText(this, "It's the first question!", Toast.LENGTH_SHORT);
+            toast.show();
+        }
         updateQuestion();
     }
 }
