@@ -21,6 +21,7 @@ public class QuizActivity extends AppCompatActivity {
             new Question(R.string.question_australia, true),
             new Question(R.string.question_oceans, true),
             new Question(R.string.question_mideast, false),
+            new Question(R.string.question_africa, false),
             new Question(R.string.question_america, true),
             new Question(R.string.question_asia, true),
     };
