@@ -14,8 +14,9 @@ import org.w3c.dom.Text;
 
 public class QuizActivity extends AppCompatActivity {
 
-    public static final String TAG = "QuizActivity";
-
+    private static final String TAG = "QuizActivity";
+    private static final String KEY_INDEX = "index";
+    private static final String KEY_BOOL_ARRAY = "boolArray";
     private Button mTrueButton;
     private Button mFalseButton;
     private ImageButton mNextButton;
@@ -31,6 +32,9 @@ public class QuizActivity extends AppCompatActivity {
             new Question(R.string.question_asia, true),
     };
 
+    private boolean[] mQuestionsAnswered = new boolean[mQuestionBank.length];
+    private int correctAnswers = 0;
+
     private int mCurrentIndex = 0;
 
     @Override
@@ -40,6 +44,11 @@ public class QuizActivity extends AppCompatActivity {
         Log.d(TAG, "onCreate(Bundle) called");
 
         setContentView(R.layout.activity_quiz);
+
+        if (savedInstanceState != null) {
+            mCurrentIndex = savedInstanceState.getInt(KEY_INDEX);
+            mQuestionsAnswered = savedInstanceState.getBooleanArray(KEY_BOOL_ARRAY);
+        }
 
         mQuestionTextView = findViewById(R.id.question_text_view);
 
@@ -118,9 +127,19 @@ public class QuizActivity extends AppCompatActivity {
         Log.d(TAG, "onDestroy() called");
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
+        Log.i(TAG, "onSaveInstanceState()");
+        savedInstanceState.putInt(KEY_INDEX, mCurrentIndex);
+        savedInstanceState.putBooleanArray(KEY_BOOL_ARRAY, mQuestionsAnswered);
+    }
+
     private void updateQuestion() {
         int question = mQuestionBank[mCurrentIndex].getTextResId();
         mQuestionTextView.setText(question);
+        mTrueButton.setEnabled(!mQuestionsAnswered[mCurrentIndex]);
+        mFalseButton.setEnabled(!mQuestionsAnswered[mCurrentIndex]);
     }
 
     private void checkAnswer(boolean userPressedTrue) {
@@ -130,11 +149,21 @@ public class QuizActivity extends AppCompatActivity {
 
         if (userPressedTrue == answerIsTrue) {
             messageResId = R.string.correct_toast;
+            correctAnswers++;
         } else {
             messageResId = R.string.incorrect_toast;
         }
 
         Toast.makeText(this, messageResId, Toast.LENGTH_SHORT).show();
+
+        //Set question to answered and disable answer buttons
+        mQuestionsAnswered[mCurrentIndex] = true;
+        mTrueButton.setEnabled(false);
+        mFalseButton.setEnabled(false);
+
+        if (quizCompleted()) {
+            displayScore();
+        }
     }
 
     private void nextQuestion() {
@@ -151,5 +180,25 @@ public class QuizActivity extends AppCompatActivity {
             toast.show();
         }
         updateQuestion();
+    }
+
+
+    private boolean quizCompleted() {
+        boolean completed = true;
+        for (int i = 0; i < mQuestionBank.length; i++) {
+            if(mQuestionsAnswered[i] == false) {
+                completed = false;
+            }
+        }
+
+        return completed;
+    }
+
+    private void displayScore() {
+        double scoreInPercentage = (100 * correctAnswers) / mQuestionBank.length;
+        Toast score = Toast.makeText(QuizActivity.this,
+                "You scored " + scoreInPercentage + "% !",
+                Toast.LENGTH_SHORT);
+        score.show();
     }
 }
